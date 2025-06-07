@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.1" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.0.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VehicleRegistry.Contracts\VehicleRegistry.Contracts.csproj" />
+    <ProjectReference Include="..\VehicleRegistry.InfraStructure\VehicleRegistry.InfraStructure.csproj" />
+    <ProjectReference Include="..\VehicleRegistry.Manager\VehicleRegistry.Manager.csproj" />
+  </ItemGroup>
+
+</Project>

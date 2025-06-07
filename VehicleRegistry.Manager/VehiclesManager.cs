@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using VehicleRegistry.Contracts.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
 using VehicleRegistry.Contracts.Interfaces.Manager;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
 
 namespace VehicleRegistry.Manager
 {
@@ -9,12 +9,12 @@ namespace VehicleRegistry.Manager
     {
         private readonly IVehiclesRepository _vehiclesRepository = vehiclesRepository;
 
-        public async Task<List<VehicleModel>> GetVehiclesAsync(string? plate, List<string>? plates, int? page = null, int? pageSize = null)
+        public async Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<string>? plates, int? page = null, int? pageSize = null)
         {
             return await _vehiclesRepository.GetVehiclesAsync(plate, plates, page, pageSize);
         }
 
-        public async Task<VehicleModel> InsertModelAsync(VehicleModel vehicleModel)
+        public async Task<VehicleDTO> InsertModelAsync(VehicleDTO vehicleModel)
         {
             if(vehicleModel.Year < 2020)
             {
@@ -29,14 +29,15 @@ namespace VehicleRegistry.Manager
             return await _vehiclesRepository.InsertOneAsync(vehicleModel);
         }
 
-        public async Task<VehicleModel> UpdateVehicleAsync(string plate, VehicleModel vehicleModel)
+        public async Task<VehicleDTO> UpdateVehicleAsync(VehicleDTO vehicleModel)
         {
-            return await _vehiclesRepository.UpdateVehicleAsync(vehicleModel);
+            await _vehiclesRepository.UpdateOneAsync(vehicleModel);
+            return vehicleModel;
         }
 
-        public async Task DeleteVehicleAsync(string plate)
+        public async Task DeleteVehicleAsync(int id)
         {
-            await _vehiclesRepository.DeleteVehicleAsync(plate);
+            await _vehiclesRepository.DeleteOneAsync(id);
         }
 
         private bool ValidateLicensePlate(string licensePlate)

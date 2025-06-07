@@ -4,8 +4,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using VehicleRegistry.Contracts.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
 
 namespace VehicleRegistry.Manager
 {

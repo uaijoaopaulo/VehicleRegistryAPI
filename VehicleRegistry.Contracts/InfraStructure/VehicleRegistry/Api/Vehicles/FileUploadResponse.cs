@@ -1,4 +1,4 @@
-﻿namespace VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api
+﻿namespace VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Vehicles
 {
     public class FileUploadResponse
     {

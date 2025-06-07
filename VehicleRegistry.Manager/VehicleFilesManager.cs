@@ -1,36 +1,30 @@
-﻿using Microsoft.Extensions.Configuration;
-using VehicleRegistry.Contracts.InfraStructure.Mongo;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
+﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
 
 namespace VehicleRegistry.Manager
 {
-    public class VehicleFilesManager(IConfiguration configuration, IVehicleFilesRepository vehicleFilesRepository, IAmazonS3Connector amazonS3Connector) : IVehicleFilesManager
+    public class VehicleFilesManager(IVehicleFilesRepository vehicleFilesRepository) : IVehicleFilesManager
     {
-        private readonly string _bucketName = configuration["S3:VehicleFileBucket"]!;
         private readonly IVehicleFilesRepository _vehicleFilesRepository = vehicleFilesRepository;
-        private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
 
-        public async Task<string> GeneratePresignedUrl(string vehiclePlate, string fileName, string contentType)
+        public async Task SaveVehicleFileDataAsync(int idVehicle, string fileName, string contentType)
         {
             try
             {
-                var objectKey = $"veiculos/{vehiclePlate}/{fileName}";
+                var objectKey = $"vehicle/{idVehicle}/{fileName}";
 
                 var newFile = new VehicleFileModel
                 {
-                    vehiclePlate = vehiclePlate,
+                    IdVehicle = idVehicle,
                     FileMimetype = contentType,
                     FileName = fileName,
                     ObjectKey = objectKey,
                     Status = FileStatus.Pending,
-                    CreatedAt = DateTime.UtcNow
+                    GeneratedAt = DateTime.UtcNow
                 };
 
                 await _vehicleFilesRepository.InsertOneAsync(newFile);
-
-                return _amazonS3Connector.GeneratePresignedUrl(_bucketName, fileName, contentType);
             }
             catch (Exception)
             {
@@ -38,15 +32,36 @@ namespace VehicleRegistry.Manager
             }
         }
 
-        public async Task<List<VehicleFileModel>> GetVehicleFilesAsync(string plate)
+        public async Task<List<VehicleFileModel>> GetVehicleFilesAsync(string bucketName, int idVehicle)
         {
             try
             {
-                return await _vehicleFilesRepository.GetVehicleFileAsync(plate);
+                var vehicleFiles = await _vehicleFilesRepository.GetVehicleFileAsync(idVehicle);
+                var updatedVehicleFiles = vehicleFiles
+                    .Select(vehicleFile =>
+                    {
+                        vehicleFile.FileUrl = $"https://{bucketName}.s3.amazonaws.com/{Uri.EscapeDataString(vehicleFile.ObjectKey)}";
+                        return vehicleFile;
+                    })
+                    .ToList();
+
+                return updatedVehicleFiles;
             }
             catch (Exception)
             {
                 throw new Exception("Error occurred getting the files");
+            }
+        }
+
+        public async Task MakeFileAsProcessedAsync(string objectKey, DateTime eventTime)
+        {
+            try
+            {
+                await _vehicleFilesRepository.MarkFileAsProcessedAsync(objectKey, eventTime);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Error occurred processing the update file's status");
             }
         }
     }

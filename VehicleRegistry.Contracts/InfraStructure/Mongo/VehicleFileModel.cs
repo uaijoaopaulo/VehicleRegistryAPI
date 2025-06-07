@@ -7,8 +7,8 @@ namespace VehicleRegistry.Contracts.InfraStructure.Mongo
     [BsonIgnoreExtraElements]
     public class VehicleFileModel
     {
-        [BsonElement("vehiclePlate")]
-        public string vehiclePlate { get; set; }
+        [BsonElement("idVehicle")]
+        public int IdVehicle { get; set; }
 
         [BsonElement("fileName")]
         public string FileName { get; set; }
@@ -32,7 +32,7 @@ namespace VehicleRegistry.Contracts.InfraStructure.Mongo
         public DateTime? CreatedAt { get; set; }
 
         [JsonIgnore]
-        [BsonElement("UploadAt")]
-        public DateTime? DataUpload { get; set; }
+        [BsonElement("generatedAt")]
+        public DateTime? GeneratedAt { get; set; }
     }
 }

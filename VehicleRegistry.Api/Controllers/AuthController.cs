@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api;
+using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Login;
 using VehicleRegistry.Contracts.Interfaces.Manager;
 
 namespace VehicleRegistry.Api.Controllers

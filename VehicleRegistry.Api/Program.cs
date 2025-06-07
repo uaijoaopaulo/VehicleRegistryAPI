@@ -1,20 +1,21 @@
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
 using Amazon.SQS;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Http;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Log;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
 using VehicleRegistry.InfraStructure.AWS;
-using VehicleRegistry.InfraStructure.Log;
+using VehicleRegistry.InfraStructure.Database;
+using VehicleRegistry.InfraStructure.Database.Repository;
 using VehicleRegistry.InfraStructure.Mongo.Repository;
 using VehicleRegistry.Manager;
-using HttpClient = VehicleRegistry.InfraStructure.Http.HttpClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,23 +29,16 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 
 /////////////////////////INFRASTRUCTURE////////////////////////////
 builder.Services.AddHttpClient();
-builder.Services.AddAWSService<IAmazonSQS>();
-builder.Services.AddAWSService<IAmazonS3>();
-
-builder.Services.AddSingleton<IMongoClient>(sp =>
-    new MongoClient(builder.Configuration.GetConnectionString("ConnectionStrings:MongoDB")));
-
+builder.Services.AddAWSService<IAmazonS3>(); 
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("PostgresConnection")));
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection")));
 builder.Services.AddScoped(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
     return client.GetDatabase("VehicleRegistry");
 });
-
-builder.Services.AddTransient<IAmazonSQSConnector, AmazonSQSConnector>();
+builder.Services.AddDefaultAWSOptions(new AWSOptions());
 builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
-builder.Services.AddDefaultAWSOptions(new Amazon.Extensions.NETCore.Setup.AWSOptions());
-builder.Services.AddSingleton<IHttpClient, HttpClient>();
-builder.Services.AddSingleton<ILogSystemClient, LogSystemClient>();
 
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IVehiclesRepository, VehiclesRepository>();

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace VehicleRegistry.Contracts.InfraStructure.AWS
+namespace VehicleRegistry.Contracts.InfraStructure.AWS.SQS
 {
     [ExcludeFromCodeCoverage]
     public class SQSMessage<T>

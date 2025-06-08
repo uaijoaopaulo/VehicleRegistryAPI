@@ -6,18 +6,18 @@ namespace VehicleRegistry.InfraStructure.Database.Repository
 {
     public class VehiclesRepository(AppDbContext context) : DbRepository<VehicleDTO>(context), IVehiclesRepository
     {
-        public async Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<string>? plates, int? page = null, int? pageSize = null)
+        public async Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<int>? ids, int? page = null, int? pageSize = null)
         {
             IQueryable<VehicleDTO> query = _context.Vehicles.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(plate))
+            if (!string.IsNullOrEmpty(plate))
             {
                 query = query.Where(v => v.Plate == plate);
             }
 
-            if (plates != null && plates.Count > 0)
+            if (ids != null && ids.Count > 0)
             {
-                query = query.Where(v => plates.Contains(v.Plate));
+                query = query.Where(v => ids.Contains(v.Id));
             }
 
             query = query.OrderBy(v => v.Make).ThenBy(v => v.Model);

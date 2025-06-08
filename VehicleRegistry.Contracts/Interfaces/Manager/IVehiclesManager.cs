@@ -5,7 +5,7 @@ namespace VehicleRegistry.Contracts.Interfaces.Manager
 {
     public interface IVehiclesManager
     {
-        Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<string>? plates, int? page = null, int? pageSize = null);
+        Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<int>? ids, int? page = null, int? pageSize = null);
         Task<VehicleDTO> InsertModelAsync(VehicleDTO vehicleModel);
         Task<VehicleDTO> UpdateVehicleAsync(VehicleDTO vehicleModel);
         Task DeleteVehicleAsync(int id);

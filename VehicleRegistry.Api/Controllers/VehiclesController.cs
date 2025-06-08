@@ -18,9 +18,9 @@ namespace VehicleRegistry.Api.Controllers
         private readonly IVehiclesManager _vehiclesManager = vehiclesManager;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;
 
-        [Authorize(Roles = "vehicle-read")]
         [HttpGet]
-        public async Task<IActionResult> GetVehicles([FromQuery] string? plate, [FromQuery] List<string>? ids, [FromQuery] int? page = null, [FromQuery] int? pageSize = null)
+        [Authorize(Roles = "vehicle-read")]
+        public async Task<IActionResult> GetVehicles([FromQuery] string? plate, [FromQuery] List<int>? ids, [FromQuery] int? page = 1, [FromQuery] int? pageSize = 50)
         {
             var errors = new List<string>();
             try
@@ -41,8 +41,8 @@ namespace VehicleRegistry.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "vehicle-admin")]
         [HttpPost]
+        [Authorize(Roles = "vehicle-admin")]
         public async Task<IActionResult> PostVehicle([FromBody] VehicleDTO vehicleModel)
         {
             var errors = new List<string>();
@@ -64,8 +64,8 @@ namespace VehicleRegistry.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "vehicle-admin")]
         [HttpPut("{id}")]
+        [Authorize(Roles = "vehicle-admin")]
         public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] VehicleDTO vehicleModel)
         {
             var errors = new List<string>();
@@ -88,8 +88,8 @@ namespace VehicleRegistry.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "vehicle-admin")]
         [HttpDelete("{id}")]
+        [Authorize(Roles = "vehicle-admin")]
         public async Task<IActionResult> DeleteVehicle([FromRoute] int id)
         {
             var errors = new List<string>();
@@ -108,8 +108,8 @@ namespace VehicleRegistry.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "vehicle-admin")]
         [HttpPost("{id}/file")]
+        [Authorize(Roles = "vehicle-admin")]
         public async Task<IActionResult> PostFileVehicle([FromRoute] int id, [FromBody] FileUploadRequest payload)
         {
             var errors = new List<string>();
@@ -162,8 +162,8 @@ namespace VehicleRegistry.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "vehicle-read")]
         [HttpGet("{id}/file")]
+        [Authorize(Roles = "vehicle-read")]
         public async Task<IActionResult> GetFilesVehicles([FromRoute] int id)
         {
             var errors = new List<string>();

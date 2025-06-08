@@ -9,9 +9,9 @@ namespace VehicleRegistry.Manager
     {
         private readonly IVehiclesRepository _vehiclesRepository = vehiclesRepository;
 
-        public async Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<string>? plates, int? page = null, int? pageSize = null)
+        public async Task<List<VehicleDTO>> GetVehiclesAsync(string? plate, List<int>? ids, int? page, int? pageSize)
         {
-            return await _vehiclesRepository.GetVehiclesAsync(plate, plates, page, pageSize);
+            return await _vehiclesRepository.GetVehiclesAsync(plate, ids, page, pageSize);
         }
 
         public async Task<VehicleDTO> InsertModelAsync(VehicleDTO vehicleModel)

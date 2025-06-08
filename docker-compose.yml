@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: VehicleRegistry.Api/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - mongo
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
+      - ConnectionStrings__PostgresConnection=Host=postgres;Port=5432;Database=vehicle_registry;Username=postgres;Password=postgres
+    volumes:
+      - ${USERPROFILE}/.aws:/root/.aws:ro
+
+  worker:
+    build:
+      context: .
+      dockerfile: VehicleRegistry.Worker/Dockerfile
+    depends_on:
+      - mongo
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
+    volumes:
+      - ${USERPROFILE}/.aws:/root/.aws:ro
+
+  mongo:
+      image: mongo:7
+      restart: always
+      ports:
+        - "27017:27017"
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: usrVehicleRegistry
+        MONGO_INITDB_ROOT_PASSWORD: 8xNpyq8dtv
+        MONGO_INITDB_DATABASE: vehicleregistry
+      volumes:
+        - ./mongo-init:/docker-entrypoint-initdb.d
+        - mongo-data:/data/db
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: vehicle_registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+volumes:
+  mongo-data:
+  pg-data:

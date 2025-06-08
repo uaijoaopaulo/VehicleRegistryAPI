@@ -1,4 +1,4 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.AWS;
+﻿using VehicleRegistry.Contracts.InfraStructure.AWS.SQS;
 
 namespace VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws
 {

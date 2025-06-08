@@ -3,7 +3,6 @@ using MongoDB.Bson;
 
 namespace VehicleRegistry.Contracts.InfraStructure.Mongo
 {
-
     [BsonIgnoreExtraElements]
     public class UserModel
     {

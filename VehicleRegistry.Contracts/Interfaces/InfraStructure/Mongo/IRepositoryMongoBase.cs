@@ -1,4 +1,4 @@
-﻿namespace VehicleRegistry.Contracts.Interfaces.Mongo
+﻿namespace VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo
 {
     public interface IRepositoryMongoBase<T> where T : class
     {

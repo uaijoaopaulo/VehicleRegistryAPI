@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 using VehicleRegistry.Contracts.InfraStructure.Mongo;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 
 namespace VehicleRegistry.InfraStructure.Mongo.Repository
 {

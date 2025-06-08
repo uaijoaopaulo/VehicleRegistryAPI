@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 using VehicleRegistry.Contracts.InfraStructure.Mongo;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 
 namespace VehicleRegistry.InfraStructure.Mongo.Repository
 {
@@ -11,19 +11,20 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
             return "vehicle-files";
         }
 
-        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(string vehiclePlate)
+        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int idVehicle)
         {
-            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.vehiclePlate, vehiclePlate)
-                & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
+            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, idVehicle)
+            & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
             return await GetAllAsync(filter);
         }
 
-        public async Task MarkFileAsProcessedAsync(string objectKey)
+        public async Task MarkFileAsProcessedAsync(string objectKey, DateTime eventTime)
         {
             var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.ObjectKey, objectKey);
             var update = Builders<VehicleFileModel>.Update
                 .Set(x => x.Status, FileStatus.Uploaded)
-                .Set(x => x.DataUpload, DateTime.UtcNow);
+                .Set(x => x.GeneratedAt, null)
+                .Set(x => x.CreatedAt, eventTime);
 
             await UpdateOneAsync(filter, update);
         }

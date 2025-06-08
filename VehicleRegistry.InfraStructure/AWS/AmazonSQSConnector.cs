@@ -1,7 +1,7 @@
 ﻿using Amazon.SQS;
 using Amazon.SQS.Model;
 using Newtonsoft.Json;
-using VehicleRegistry.Contracts.InfraStructure.AWS;
+using VehicleRegistry.Contracts.InfraStructure.AWS.SQS;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 
 namespace VehicleRegistry.InfraStructure.AWS

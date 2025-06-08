@@ -3,12 +3,18 @@
     public interface IAmazonS3Connector
     {
         /// <summary>
-        /// Generates a pre-signed URL that allows temporary access to upload a file to the specified S3 bucket.
+        /// 
         /// </summary>
-        /// <param name="bucketName">The name of the S3 bucket.</param>
-        /// <param name="fileName">The name of the file to be uploaded.</param>
-        /// <param name="contentType">The MIME type of the file.</param>
-        /// <returns>A pre-signed URL for uploading the file.</returns>
-        string GeneratePresignedUrl(string bucketName, string fileName, string contentType);
+        /// <param name="fileName"></param>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        string GeneratePresignedUrl(string fileName, string contentType);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objectKey"></param>
+        /// <returns></returns>
+        string GetTemporaryAccessUrl(string objectKey);
     }
 }

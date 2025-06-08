@@ -1,6 +1,6 @@
 ﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
 
-namespace VehicleRegistry.Contracts.Interfaces.Mongo
+namespace VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo
 {
     public interface IUsersRepository : IRepositoryMongoBase<UserModel>
     {

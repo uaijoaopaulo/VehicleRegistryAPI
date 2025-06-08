@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Manager\Seller\" />
+    <Folder Include="Manager\" />
     <Folder Include="Worker\" />
   </ItemGroup>
 

@@ -1,20 +1,21 @@
+using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
-using Amazon.SQS;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Http;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Log;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
-using VehicleRegistry.Contracts.Interfaces.Mongo;
 using VehicleRegistry.InfraStructure.AWS;
-using VehicleRegistry.InfraStructure.Log;
+using VehicleRegistry.InfraStructure.Database;
+using VehicleRegistry.InfraStructure.Database.Repository;
 using VehicleRegistry.InfraStructure.Mongo.Repository;
 using VehicleRegistry.Manager;
-using HttpClient = VehicleRegistry.InfraStructure.Http.HttpClient;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,28 +29,32 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 
 /////////////////////////INFRASTRUCTURE////////////////////////////
 builder.Services.AddHttpClient();
-builder.Services.AddAWSService<IAmazonSQS>();
 builder.Services.AddAWSService<IAmazonS3>();
-
-builder.Services.AddSingleton<IMongoClient>(sp =>
-    new MongoClient(builder.Configuration.GetConnectionString("ConnectionStrings:MongoDB")));
-
+builder.Services.AddDefaultAWSOptions(new AWSOptions());
+builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"), b =>
+    {
+        b.MigrationsAssembly("VehicleRegistry.InfraStructure");
+    });
+});
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection")));
 builder.Services.AddScoped(sp =>
 {
+    var connectionString = builder.Configuration.GetConnectionString("MongoDBConnection");
+    var mongoUrl = new MongoUrl(connectionString);
+
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("VehicleRegistry");
+    return client.GetDatabase(mongoUrl.DatabaseName);
 });
 
-builder.Services.AddTransient<IAmazonSQSConnector, AmazonSQSConnector>();
-builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
-builder.Services.AddDefaultAWSOptions(new Amazon.Extensions.NETCore.Setup.AWSOptions());
-builder.Services.AddSingleton<IHttpClient, HttpClient>();
-builder.Services.AddSingleton<ILogSystemClient, LogSystemClient>();
-
+/////////////////////////REPOSITORY////////////////////////////
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IVehiclesRepository, VehiclesRepository>();
 builder.Services.AddScoped<IVehicleFilesRepository, VehicleFilesRepository>();
 
+/////////////////////////MANAGER////////////////////////////
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.AddScoped<IVehiclesManager, VehiclesManager>();
 builder.Services.AddScoped<IVehicleFilesManager, VehicleFilesManager>();
@@ -57,7 +62,35 @@ builder.Services.AddScoped<IVehicleFilesManager, VehicleFilesManager>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "VehicleRegistry", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter the JWT token in the field below. Example: Bearer {your token}"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -79,6 +112,12 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -86,7 +125,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

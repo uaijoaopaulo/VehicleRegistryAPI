@@ -11,6 +11,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VehicleRegistry.InfraStruct
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VehicleRegistry.Manager", "VehicleRegistry.Manager\VehicleRegistry.Manager.csproj", "{BF9BAF8E-AF38-4EF8-8153-DE40FA9C0374}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VehicleRegistry.Worker", "VehicleRegistry.Worker\VehicleRegistry.Worker.csproj", "{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{28EECC32-08B4-4528-A069-C65B109C193A}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongo-init", "mongo-init", "{FF443989-9790-4317-9780-028A219B17A7}"
+	ProjectSection(SolutionItems) = preProject
+		mongo-init\00-init-user.js = mongo-init\00-init-user.js
+		mongo-init\01-init-users-collection.js = mongo-init\01-init-users-collection.js
+		mongo-init\02-init-vehicle-files-collection.js = mongo-init\02-init-vehicle-files-collection.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +48,16 @@ Global
 		{BF9BAF8E-AF38-4EF8-8153-DE40FA9C0374}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF9BAF8E-AF38-4EF8-8153-DE40FA9C0374}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF9BAF8E-AF38-4EF8-8153-DE40FA9C0374}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FF443989-9790-4317-9780-028A219B17A7} = {28EECC32-08B4-4528-A069-C65B109C193A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {17EDF052-8C45-43AE-B55B-F8C51EF12014}

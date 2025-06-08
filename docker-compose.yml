@@ -10,6 +10,7 @@ services:
     depends_on:
       - mongo
     environment:
+      - AWS_REGION=us-east-2
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
@@ -24,6 +25,7 @@ services:
     depends_on:
       - mongo
     environment:
+      - AWS_REGION=us-east-2
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
     volumes:

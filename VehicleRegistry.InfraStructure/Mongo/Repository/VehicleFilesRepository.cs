@@ -13,8 +13,8 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
 
         public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int idVehicle)
         {
-            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.IdVehicle, idVehicle)
-                & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
+            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, idVehicle)
+            & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
             return await GetAllAsync(filter);
         }
 
@@ -23,6 +23,7 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
             var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.ObjectKey, objectKey);
             var update = Builders<VehicleFileModel>.Update
                 .Set(x => x.Status, FileStatus.Uploaded)
+                .Set(x => x.GeneratedAt, null)
                 .Set(x => x.CreatedAt, eventTime);
 
             await UpdateOneAsync(filter, update);

@@ -1,4 +1,5 @@
 using Amazon.Extensions.NETCore.Setup;
+using Amazon.S3;
 using Amazon.SQS;
 using MongoDB.Driver;
 using System.Net;
@@ -18,13 +19,18 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 /////////////////////////INFRASTRUCTURE////////////////////////////
 builder.Services.AddHttpClient();
 builder.Services.AddAWSService<IAmazonSQS>();
+builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddDefaultAWSOptions(new AWSOptions());
 builder.Services.AddTransient<IAmazonSQSConnector, AmazonSQSConnector>();
-builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDB")));
+builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
+builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection")));
 builder.Services.AddTransient(sp =>
 {
+    var connectionString = builder.Configuration.GetConnectionString("MongoDBConnection");
+    var mongoUrl = new MongoUrl(connectionString);
+
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("VehicleRegistry");
+    return client.GetDatabase(mongoUrl.DatabaseName);
 });
 
 //////////////////////////MANAGER/////////////////////////////

@@ -4,9 +4,14 @@ using VehicleRegistry.Contracts.Interfaces.Manager;
 
 namespace VehicleRegistry.Worker.Workers
 {
-    public class FileUploadedWorkerService(IConfiguration configuration, IAmazonSQSConnector amazonSQSConnector, IVehicleFilesManager vehicleFilesManager) : BackgroundService
+    public class FileUploadedWorkerService(
+        IConfiguration configuration, 
+        ILogger<FileUploadedWorkerService> logger, 
+        IAmazonSQSConnector amazonSQSConnector, 
+        IVehicleFilesManager vehicleFilesManager) : BackgroundService
     {
         private readonly string _queueUrl = configuration["AWSQueueUrl:FileUploaded"]!;
+        private readonly ILogger<FileUploadedWorkerService> _logger = logger;
         private readonly IAmazonSQSConnector _amazonSQSConnector = amazonSQSConnector;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;
 
@@ -20,23 +25,35 @@ namespace VehicleRegistry.Worker.Workers
 
                     foreach (var fileData in queueFiles)
                     {
-                        foreach (var record in fileData.Body!.Records)
+                        try
                         {
-                            if (string.IsNullOrWhiteSpace(record.S3.Object.Key))
+                            foreach (var record in fileData.Body!.Records)
                             {
-                                continue;
-                            }
+                                if (string.IsNullOrWhiteSpace(record.S3.Object.Key))
+                                {
+                                    continue;
+                                }
 
-                            var objectKey = Uri.UnescapeDataString(record.S3.Object.Key);
-                            await _vehicleFilesManager.MakeFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
+                                var objectKey = Uri.UnescapeDataString(record.S3.Object.Key);
+                                await _vehicleFilesManager.MakeFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
+                                _logger.LogInformation("Processed object {ObjectKey}", objectKey);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error processing a message from the queue.");
+                        }
+                        finally
+                        {
+                            await _amazonSQSConnector.DeleteMessageAsync(fileData, _queueUrl);
+                            _logger.LogDebug("Deleted message from queue.");
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    //Log
+                    _logger.LogError(e, "An unexpected error occurred while retrieving or iterating messages.");
                 }
-                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
             }
         }
     }

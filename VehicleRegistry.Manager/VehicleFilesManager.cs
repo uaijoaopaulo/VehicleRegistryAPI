@@ -1,22 +1,26 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
+﻿using Microsoft.Extensions.Configuration;
+using VehicleRegistry.Contracts.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
 
 namespace VehicleRegistry.Manager
 {
-    public class VehicleFilesManager(IVehicleFilesRepository vehicleFilesRepository) : IVehicleFilesManager
+    public class VehicleFilesManager(IConfiguration configuration, IVehicleFilesRepository vehicleFilesRepository, IAmazonS3Connector amazonS3Connector) : IVehicleFilesManager
     {
+        private readonly string _awsRegion = configuration["AWS:Region"]!;
+        private readonly string _bucketName = configuration["S3:VehicleFileBucket"]!;
         private readonly IVehicleFilesRepository _vehicleFilesRepository = vehicleFilesRepository;
+        private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
 
         public async Task SaveVehicleFileDataAsync(int idVehicle, string fileName, string contentType)
         {
             try
             {
-                var objectKey = $"vehicle/{idVehicle}/{fileName}";
-
+                var objectKey = $"{idVehicle}/{fileName}";
                 var newFile = new VehicleFileModel
                 {
-                    IdVehicle = idVehicle,
+                    VehicleId = idVehicle,
                     FileMimetype = contentType,
                     FileName = fileName,
                     ObjectKey = objectKey,
@@ -32,7 +36,7 @@ namespace VehicleRegistry.Manager
             }
         }
 
-        public async Task<List<VehicleFileModel>> GetVehicleFilesAsync(string bucketName, int idVehicle)
+        public async Task<List<VehicleFileModel>> GetVehicleFilesAsync(int idVehicle)
         {
             try
             {
@@ -40,7 +44,7 @@ namespace VehicleRegistry.Manager
                 var updatedVehicleFiles = vehicleFiles
                     .Select(vehicleFile =>
                     {
-                        vehicleFile.FileUrl = $"https://{bucketName}.s3.amazonaws.com/{Uri.EscapeDataString(vehicleFile.ObjectKey)}";
+                        vehicleFile.FileUrl = _amazonS3Connector.GetTemporaryAccessUrl(vehicleFile.ObjectKey);
                         return vehicleFile;
                     })
                     .ToList();

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Configuration;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -30,7 +29,9 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 
 /////////////////////////INFRASTRUCTURE////////////////////////////
 builder.Services.AddHttpClient();
-builder.Services.AddAWSService<IAmazonS3>(); 
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddDefaultAWSOptions(new AWSOptions());
+builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"), b =>
@@ -41,16 +42,19 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection")));
 builder.Services.AddScoped(sp =>
 {
-    var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("vehicleregistry");
-});
-builder.Services.AddDefaultAWSOptions(new AWSOptions());
-builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
+    var connectionString = builder.Configuration.GetConnectionString("MongoDBConnection");
+    var mongoUrl = new MongoUrl(connectionString);
 
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase(mongoUrl.DatabaseName);
+});
+
+/////////////////////////REPOSITORY////////////////////////////
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IVehiclesRepository, VehiclesRepository>();
 builder.Services.AddScoped<IVehicleFilesRepository, VehicleFilesRepository>();
 
+/////////////////////////MANAGER////////////////////////////
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.AddScoped<IVehiclesManager, VehiclesManager>();
 builder.Services.AddScoped<IVehicleFilesManager, VehicleFilesManager>();

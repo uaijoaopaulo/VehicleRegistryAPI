@@ -2,6 +2,6 @@
 {
     public class S3Message
     {
-        public List<RecordModel> Records { get; set; }
+        public List<RecordModel> Records { get; set; } = [];
     }
 }

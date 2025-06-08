@@ -11,9 +11,8 @@ namespace VehicleRegistry.Api.Controllers
 {
     [ApiController]
     [Route("api/vehicles")]
-    public class VehiclesController(IConfiguration configuration, IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IAmazonS3Connector amazonS3Connector) : ControllerBase
+    public class VehiclesController(IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IAmazonS3Connector amazonS3Connector) : ControllerBase
     {
-        private readonly string _bucketName = configuration["S3:VehicleFileBucket"]!;
         private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
         private readonly IVehiclesManager _vehiclesManager = vehiclesManager;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;
@@ -138,8 +137,8 @@ namespace VehicleRegistry.Api.Controllers
 
                 await _vehicleFilesManager.SaveVehicleFileDataAsync(id, payload.FileName, payload.FileMimetype);
 
-                var fileName = Uri.EscapeDataString(payload.FileName);
-                var presignedUrl = _amazonS3Connector.GeneratePresignedUrl(_bucketName, fileName, payload.FileMimetype);
+                var fileName = $"{id}/{Uri.EscapeDataString(payload.FileName)}";
+                var presignedUrl = _amazonS3Connector.GeneratePresignedUrl(fileName, payload.FileMimetype);
                 var response = new FileUploadResponse
                 {
                     FileName = payload.FileName,
@@ -169,7 +168,7 @@ namespace VehicleRegistry.Api.Controllers
             var errors = new List<string>();
             try
             {
-                var files = await _vehicleFilesManager.GetVehicleFilesAsync(_bucketName, id);
+                var files = await _vehicleFilesManager.GetVehicleFilesAsync(id);
                 return Ok(new ApiResponse<List<VehicleFileModel>>
                 {
                     Result = files

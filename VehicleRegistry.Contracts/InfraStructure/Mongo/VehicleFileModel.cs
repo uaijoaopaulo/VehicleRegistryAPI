@@ -7,8 +7,8 @@ namespace VehicleRegistry.Contracts.InfraStructure.Mongo
     [BsonIgnoreExtraElements]
     public class VehicleFileModel
     {
-        [BsonElement("idVehicle")]
-        public int IdVehicle { get; set; }
+        [BsonElement("vehicleId")]
+        public int VehicleId { get; set; }
 
         [BsonElement("fileName")]
         public string FileName { get; set; }

@@ -10,7 +10,7 @@ namespace VehicleRegistry.Contracts.Interfaces.Manager
         /// <param name="bucketName"></param>
         /// <param name="idVehicle"></param>
         /// <returns></returns>
-        Task<List<VehicleFileModel>> GetVehicleFilesAsync(string bucketName, int idVehicle);
+        Task<List<VehicleFileModel>> GetVehicleFilesAsync(int idVehicle);
 
         /// <summary>
         /// 

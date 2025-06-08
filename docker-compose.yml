@@ -13,7 +13,7 @@ services:
       - AWS_REGION=us-east-2
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
+      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry
       - ConnectionStrings__PostgresConnection=Host=postgres;Port=5432;Database=vehicle_registry;Username=postgres;Password=postgres
     volumes:
       - ${USERPROFILE}/.aws:/root/.aws:ro
@@ -27,7 +27,7 @@ services:
     environment:
       - AWS_REGION=us-east-2
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry?authSource=admin
+      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry
     volumes:
       - ${USERPROFILE}/.aws:/root/.aws:ro
 

@@ -1,19 +1,19 @@
 ﻿using MongoDB.Driver;
-using VehicleRegistry.Contracts.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.Manager.VehicleFiles;
 
 namespace VehicleRegistry.InfraStructure.Mongo.Repository
 {
     public class VehicleFilesRepository(IMongoDatabase mongoDatabase) : MongoBaseClient<VehicleFileModel>(mongoDatabase), IVehicleFilesRepository
     {
-        protected override string GetCollectionName<T>()
+        protected override string GetCollectionName()
         {
             return "vehicle-files";
         }
 
-        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int idVehicle)
+        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int vehicleId)
         {
-            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, idVehicle)
+            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, vehicleId)
             & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
             return await GetAllAsync(filter);
         }

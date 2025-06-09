@@ -5,8 +5,8 @@ namespace VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Vehicles
     public class FileUploadRequest
     {
         [Required]
-        public string FileName { get; set; }
+        public required string FileName { get; set; }
         [Required]
-        public string FileMimetype { get; set; }
+        public required string FileMimetype { get; set; }
     }
 }

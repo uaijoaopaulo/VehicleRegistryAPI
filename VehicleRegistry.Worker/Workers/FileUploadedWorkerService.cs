@@ -29,14 +29,14 @@ namespace VehicleRegistry.Worker.Workers
                         {
                             foreach (var record in fileData.Body!.Records)
                             {
-                                if (string.IsNullOrWhiteSpace(record.S3.Object.Key))
+                                if (string.IsNullOrWhiteSpace(record.S3.Object!.Key))
                                 {
                                     continue;
                                 }
 
                                 var objectKey = Uri.UnescapeDataString(record.S3.Object.Key);
-                                await _vehicleFilesManager.MakeFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
-                                _logger.LogInformation("Processed object {ObjectKey}", objectKey);
+                                await _vehicleFilesManager.MarkFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
+                                _logger.LogInformation($"Processed file {objectKey}");
                             }
                         }
                         catch (Exception ex)

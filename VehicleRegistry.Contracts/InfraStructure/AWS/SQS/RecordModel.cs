@@ -3,6 +3,6 @@
     public class RecordModel
     {
         public DateTime? EventTime { get; set; }
-        public S3Model S3 { get; set; }
+        public required S3Model S3 { get; set; }
     }
 }

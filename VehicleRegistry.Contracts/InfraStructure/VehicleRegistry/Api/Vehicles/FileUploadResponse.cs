@@ -2,8 +2,8 @@
 {
     public class FileUploadResponse
     {
-        public string FileName { get; set; }
-        public string FileMimetype { get; set; }
-        public string UploadUrl { get; set; }
+        public string FileName { get; set; } = string.Empty;
+        public string FileMimetype { get; set; } = string.Empty;
+        public string UploadUrl { get; set; } = string.Empty;
     }
 }

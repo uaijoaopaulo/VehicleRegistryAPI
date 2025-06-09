@@ -14,7 +14,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <returns>A task representing the asynchronous operation, containing the inserted document.</returns>
         public async Task<T> InsertOneAsync(T model)
         {
-            await GetCollection<T>().InsertOneAsync(model);
+            await GetCollection().InsertOneAsync(model);
             return model;
         }
 
@@ -26,7 +26,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <returns>A task representing the asynchronous update operation.</returns>
         protected async Task UpdateOneAsync(FilterDefinition<T> filter, UpdateDefinition<T> update)
         {
-            await GetCollection<T>().UpdateOneAsync(filter, update);
+            await GetCollection().UpdateOneAsync(filter, update);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <returns>A task representing the asynchronous operation, containing the updated document.</returns>
         protected async Task<T> ReplaceOneAsync(FilterDefinition<T> filter, T model)
         {
-            await GetCollection<T>().ReplaceOneAsync(filter, model, new ReplaceOptions { IsUpsert = true });
+            await GetCollection().ReplaceOneAsync(filter, model, new ReplaceOptions { IsUpsert = true });
             return model;
         }
 
@@ -50,7 +50,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <returns>The matched document, or null if no match is found.</returns>
         protected async Task<T?> GetOneAsync(FilterDefinition<T> filter)
         {
-            return (await GetCollection<T>().FindAsync(filter)).SingleOrDefault();
+            return (await GetCollection().FindAsync(filter)).SingleOrDefault();
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <returns>A task representing the asynchronous operation, containing the list of matching documents.</returns>
         protected async Task<List<T>> GetAllAsync(FilterDefinition<T> filter, SortDefinition<T>? sort = null, int? skip = null, int? limit = null)
         {
-            var query = GetCollection<T>().Find(filter);
+            var query = GetCollection().Find(filter);
 
             if (sort is not null)
             {
@@ -91,7 +91,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <param name="filter">The filter to identify the document to delete.</param>
         protected async Task DeleteOneAsync(FilterDefinition<T> filter)
         {
-            await GetCollection<T>().DeleteOneAsync(filter);
+            await GetCollection().DeleteOneAsync(filter);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// <param name="filter">The filter to identify the documents to delete.</param>
         protected async Task DeleteManyAsync(FilterDefinition<T> filter)
         {
-            await GetCollection<T>().DeleteManyAsync(filter);
+            await GetCollection().DeleteManyAsync(filter);
         }
 
         /// <summary>
@@ -109,16 +109,16 @@ namespace VehicleRegistry.InfraStructure.Mongo
         /// </summary>
         /// <typeparam name="T">The model type.</typeparam>
         /// <returns>The name of the MongoDB collection.</returns>
-        protected abstract string GetCollectionName<T>();
+        protected abstract string GetCollectionName();
 
         /// <summary>
         /// Retrieves the MongoDB collection for the specified model type, using the default collection name.
         /// </summary>
         /// <typeparam name="T">The model type.</typeparam>
         /// <returns>The MongoDB collection instance.</returns>
-        private IMongoCollection<T> GetCollection<T>()
+        private IMongoCollection<T> GetCollection()
         {
-            return _mongoDatabase.GetCollection<T>(GetCollectionName<T>());
+            return _mongoDatabase.GetCollection<T>(GetCollectionName());
         }
     }
 }

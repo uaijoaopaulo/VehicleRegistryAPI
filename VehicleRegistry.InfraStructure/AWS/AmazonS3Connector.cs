@@ -10,7 +10,7 @@ namespace VehicleRegistry.InfraStructure.AWS
         private readonly string _bucketName = configuration["S3:VehicleFileBucket"]!;
         private readonly IAmazonS3 _amazonS3Client = amazonS3Client;
 
-        public string GeneratePresignedUrl(string fileName, string contentType)
+        public string GeneratePresignedUrl(string fileName, string mimeType)
         {
             var urlString = string.Empty;
             try
@@ -21,7 +21,7 @@ namespace VehicleRegistry.InfraStructure.AWS
                     Key = fileName,
                     Verb = HttpVerb.PUT,
                     Expires = DateTime.UtcNow.AddMinutes(15),
-                    ContentType = contentType
+                    ContentType = mimeType
                 };
 
                 urlString = _amazonS3Client.GetPreSignedURL(request);

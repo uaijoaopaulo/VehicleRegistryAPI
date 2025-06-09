@@ -7,8 +7,9 @@ namespace VehicleRegistry.Api.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController(IAuthManager authManager) : ControllerBase
+    public class AuthController(ILogger<AuthController> logger, IAuthManager authManager) : ControllerBase
     {
+        private readonly ILogger<AuthController> _logger = logger;
         private readonly IAuthManager _authManager = authManager;
 
         [HttpPost("login")]
@@ -20,28 +21,26 @@ namespace VehicleRegistry.Api.Controllers
 
                 if (user is null)
                 {
-                    return Unauthorized(new ApiResponse<LoginResponse>
-                    {
-                        Errors = new List<string> { "Usuário ou senha inválidos" }
-                    });
+                    _logger.LogInformation($"Authentication failed for user '{request.Username}'");
+                    return Unauthorized(ApiResponseHelper.Failure("Invalid username or password"));
                 }
 
                 var token = _authManager.GenerateToken(user);
-                return Ok(new ApiResponse<LoginResponse>
+
+                _logger.LogInformation($"User '{request.Username}' successfully authenticated");
+
+                var response = new LoginResponse
                 {
-                    Result = new LoginResponse
-                    {
-                        Token = token,
-                        Roles = user.Roles
-                    }
-                });
+                    Token = token,
+                    Roles = user.Roles
+                };
+
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
-                return BadRequest(new ApiResponse<LoginResponse>
-                {
-                    Errors = new List<string> { e.Message }
-                });
+                _logger.LogError(e, $"Unexpected error during authentication for user '{request.Username}'");
+                return BadRequest(ApiResponseHelper.Failure("An unexpected error occurred. Please try again later."));
             }
         }
     }

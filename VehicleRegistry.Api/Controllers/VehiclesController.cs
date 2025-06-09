@@ -1,42 +1,48 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VehicleRegistry.Contracts.InfraStructure.Mongo;
+using VehicleRegistry.Contracts.InfraStructure.Validators;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Vehicles;
-using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.Manager;
+using VehicleRegistry.Contracts.Manager.Vehicle;
 
 namespace VehicleRegistry.Api.Controllers
 {
     [ApiController]
     [Route("api/vehicles")]
-    public class VehiclesController(IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IAmazonS3Connector amazonS3Connector) : ControllerBase
+    public class VehiclesController(ILogger<VehiclesController> logger, IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IAmazonS3Connector amazonS3Connector, IFileExtensionValidator fileExtensionValidator) : ControllerBase
     {
+        private readonly ILogger<VehiclesController> _logger = logger;
         private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
         private readonly IVehiclesManager _vehiclesManager = vehiclesManager;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;
+        private readonly IFileExtensionValidator _fileExtensionValidator = fileExtensionValidator;
 
         [HttpGet]
         [Authorize(Roles = "vehicle-read")]
-        public async Task<IActionResult> GetVehicles([FromQuery] string? plate, [FromQuery] List<int>? ids, [FromQuery] int? page = 1, [FromQuery] int? pageSize = 50)
+        public async Task<IActionResult> GetVehicles([FromQuery] string? plate, [FromQuery] List<int>? vehicleIds, [FromQuery] int? page = 1, [FromQuery] int? pageSize = 50)
         {
             var errors = new List<string>();
+
+            _logger.LogInformation("Request received to get vehicles. Plate: {Plate}, Ids: {Ids}, Page: {Page}, PageSize: {PageSize}",
+                plate, string.Join(",", vehicleIds ?? new List<int>()), page, pageSize);
+
             try
             {
-                var allVehicles = await _vehiclesManager.GetVehiclesAsync(plate, ids, page, pageSize);
-                return Ok(new ApiResponse<List<VehicleDTO>>
-                {
-                    Result = allVehicles
-                });
+                var response = await _vehiclesManager.GetVehiclesAsync(plate, vehicleIds, page, pageSize);
+
+                _logger.LogDebug($"Vehicles query return {response.Count} results.");
+
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "Error occurred while retrieving vehicles. Plate: {Plate}, Ids: {Ids}, Page: {Page}, PageSize: {PageSize}",
+                    plate, string.Join(",", vehicleIds ?? new List<int>()), page, pageSize);
+
                 errors.Add(e.Message);
-                return BadRequest(new ApiResponse<VehicleDTO>
-                {
-                    Errors = errors
-                });
+                return BadRequest(ApiResponseHelper.Failure(errors));
             }
         }
 
@@ -45,142 +51,143 @@ namespace VehicleRegistry.Api.Controllers
         public async Task<IActionResult> PostVehicle([FromBody] VehicleDTO vehicleModel)
         {
             var errors = new List<string>();
+
+            _logger.LogInformation("Request received to create a new vehicle. Plate: {Plate}, Model: {Model}, Year: {Year}, Make: {Make}",
+                vehicleModel.Plate, vehicleModel.Model, vehicleModel.Year, vehicleModel.Make ?? string.Empty);
+
             try
             {
-                var vehicleResponse = await _vehiclesManager.InsertModelAsync(vehicleModel);
-                return Ok(new ApiResponse<VehicleDTO>
-                {
-                    Result = vehicleResponse
-                });
+                var response = await _vehiclesManager.InsertModelAsync(vehicleModel);
+
+                _logger.LogDebug($"Vehicle successfully created. ID: {response.Id}");
+
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
+                _logger.LogError(e, $"Error occurred while creating a new vehicle. Plate: {vehicleModel.Plate}");
+
                 errors.Add(e.Message);
-                return BadRequest(new ApiResponse<VehicleDTO>
-                {
-                    Errors = errors
-                });
+                return BadRequest(ApiResponseHelper.Failure(errors));
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{vehicleId}")]
         [Authorize(Roles = "vehicle-admin")]
-        public async Task<IActionResult> PutVehicle([FromRoute] int id, [FromBody] VehicleDTO vehicleModel)
+        public async Task<IActionResult> PutVehicle([FromRoute] int vehicleId, [FromBody] VehicleDTO vehicleModel)
+        {
+            var errors = new List<string>();
+
+            _logger.LogInformation("Request received to update vehicle. ID: {Id}, Plate: {Plate}, Model: {Model}, Year: {Year}, Make: {Make}",
+                vehicleId, vehicleModel.Plate, vehicleModel.Model, vehicleModel.Year, vehicleModel.Make ?? string.Empty);
+
+            try
+            {
+                vehicleModel.Id = vehicleId;
+                var response = await _vehiclesManager.UpdateVehicleAsync(vehicleModel);
+
+                _logger.LogDebug($"Vehicle successfully updated. ID: {response.Id}");
+
+                return Ok(ApiResponseHelper.Success(response));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Error occurred while updating vehicle. ID: {vehicleId}");
+
+                errors.Add(e.Message);
+                return BadRequest(ApiResponseHelper.Failure(errors));
+            }
+        }
+
+        [HttpDelete("{vehicleId}")]
+        [Authorize(Roles = "vehicle-admin")]
+        public async Task<IActionResult> DeleteVehicle([FromRoute] int vehicleId)
         {
             var errors = new List<string>();
             try
             {
-                vehicleModel.Id = id;
-                var vehicleResponse = await _vehiclesManager.UpdateVehicleAsync(vehicleModel);
-                return Ok(new ApiResponse<VehicleDTO>
-                {
-                    Result = vehicleResponse
-                });
-            }
-            catch (Exception e)
-            {
-                errors.Add(e.Message);
-                return BadRequest(new ApiResponse<VehicleDTO>
-                {
-                    Errors = errors
-                });
-            }
-        }
+                await _vehiclesManager.DeleteVehicleAsync(vehicleId);
 
-        [HttpDelete("{id}")]
-        [Authorize(Roles = "vehicle-admin")]
-        public async Task<IActionResult> DeleteVehicle([FromRoute] int id)
-        {
-            var errors = new List<string>();
-            try
-            {
-                await _vehiclesManager.DeleteVehicleAsync(id);
+                _logger.LogDebug("Vehicle successfully deleted. ID: {Id}", vehicleId);
+
                 return NoContent();
             }
             catch (Exception e)
             {
+                _logger.LogError(e, $"Unexpected error while deleting vehicle. ID: {vehicleId}");
                 errors.Add(e.Message);
-                return BadRequest(new ApiResponse<VehicleDTO>
-                {
-                    Errors = errors
-                });
+                return BadRequest(ApiResponseHelper.Failure(errors));
             }
         }
 
-        [HttpPost("{id}/file")]
+        [HttpPost("{vehicleId}/file")]
         [Authorize(Roles = "vehicle-admin")]
-        public async Task<IActionResult> PostFileVehicle([FromRoute] int id, [FromBody] FileUploadRequest payload)
+        public async Task<IActionResult> PostFileVehicle([FromRoute] int vehicleId, [FromBody] FileUploadRequest payload)
         {
             var errors = new List<string>();
+
+            _logger.LogInformation($"Request received to upload a file for vehicle. ID: {vehicleId}, FileName: {payload.FileName}, MimeType: {payload.FileMimetype}");
+
             try
             {
-                var allowedExtensions = new[] { ".pdf", ".png", ".jpg", ".jpeg" };
                 var fileExtension = Path.GetExtension(payload.FileName)?.ToLowerInvariant();
-                if (!string.IsNullOrEmpty(fileExtension) && !allowedExtensions.Contains(fileExtension))
+                if (!string.IsNullOrEmpty(fileExtension) && !_fileExtensionValidator.IsValidExtension(fileExtension))
                 {
                     errors.Add("Only .pdf, .png, .jpg, or .jpeg files are allowed.");
                 }
 
-                var allowedMimetypes = new[] { "application/pdf", "image/png", "image/jpeg" };
-                if (!allowedMimetypes.Contains(payload.FileMimetype.ToLowerInvariant()))
+                if (!_fileExtensionValidator.IsValidMimeType(payload.FileMimetype))
                 {
                     errors.Add("Only PDF and image files (PNG, JPG, JPEG) are allowed.");
                 }
 
                 if (errors.Any())
                 {
-                    return BadRequest(new ApiResponse<VehicleFileModel>
-                    {
-                        Errors = errors
-                    });
+                    _logger.LogWarning($"File upload validation failed for ID: {vehicleId}. Errors: {string.Join("; ", errors)}");
+                    return BadRequest(ApiResponseHelper.Failure(errors));
                 }
 
-                await _vehicleFilesManager.SaveVehicleFileDataAsync(id, payload.FileName, payload.FileMimetype);
+                await _vehicleFilesManager.SaveVehicleFileDataAsync(vehicleId, payload.FileName, payload.FileMimetype);
 
-                var fileName = $"{id}/{Uri.EscapeDataString(payload.FileName)}";
+                var fileName = $"{vehicleId}/{Uri.EscapeDataString(payload.FileName)}";
                 var presignedUrl = _amazonS3Connector.GeneratePresignedUrl(fileName, payload.FileMimetype);
+
+                _logger.LogDebug($"Presigned URL generated successfully for ID: {vehicleId}, FileName: {payload.FileName}");
+
                 var response = new FileUploadResponse
                 {
                     FileName = payload.FileName,
                     FileMimetype = payload.FileMimetype,
                     UploadUrl = presignedUrl
                 };
-
-                return Ok(new ApiResponse<FileUploadResponse>
-                {
-                    Result = response
-                });
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
-                errors.Add(e.Message);
-                return BadRequest(new ApiResponse<FileUploadResponse>
-                {
-                    Errors = errors
-                });
+                _logger.LogError(e, $"Unexpected error while processing file upload for ID: {vehicleId}");
+                errors.Add("An unexpected error occurred. Please try again later.");
+                return BadRequest(ApiResponseHelper.Failure(errors));
             }
         }
 
-        [HttpGet("{id}/file")]
+        [HttpGet("{vehicleId}/file")]
         [Authorize(Roles = "vehicle-read")]
-        public async Task<IActionResult> GetFilesVehicles([FromRoute] int id)
+        public async Task<IActionResult> GetFilesVehicles([FromRoute] int vehicleId)
         {
             var errors = new List<string>();
             try
             {
-                var files = await _vehicleFilesManager.GetVehicleFilesAsync(id);
-                return Ok(new ApiResponse<List<VehicleFileModel>>
-                {
-                    Result = files
-                });
+                var response = await _vehicleFilesManager.GetVehicleFilesAsync(vehicleId);
+
+                _logger.LogDebug($"Retrieved {response.Count} files for ID: {vehicleId}");
+
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
-                errors.Add(e.Message);
-                return BadRequest(new ApiResponse<VehicleFileModel>
-                {
-                    Errors = errors
-                });
+                _logger.LogError(e, "Unexpected error while getting files upload for ID: {VehicleId}", vehicleId);
+                errors.Add("An unexpected error occurred. Please try again later.");
+                return BadRequest(ApiResponseHelper.Failure(errors));
             }
         }
     }

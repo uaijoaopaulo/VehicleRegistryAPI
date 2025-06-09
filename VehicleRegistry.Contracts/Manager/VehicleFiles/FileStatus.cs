@@ -1,4 +1,4 @@
-﻿namespace VehicleRegistry.Contracts.InfraStructure.Mongo
+﻿namespace VehicleRegistry.Contracts.Manager.VehicleFiles
 {
     public enum FileStatus
     {

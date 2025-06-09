@@ -29,7 +29,7 @@ namespace VehicleRegistry.Worker.Workers
                         {
                             foreach (var record in fileData.Body!.Records)
                             {
-                                if (string.IsNullOrWhiteSpace(record.S3.Object.Key))
+                                if (string.IsNullOrWhiteSpace(record.S3.Object!.Key))
                                 {
                                     continue;
                                 }

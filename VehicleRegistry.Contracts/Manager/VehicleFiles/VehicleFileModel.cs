@@ -14,17 +14,17 @@ namespace VehicleRegistry.Contracts.Manager.VehicleFiles
         public int VehicleId { get; set; }
 
         [BsonElement("fileName")]
-        public string FileName { get; set; }
+        public string FileName { get; set; } = string.Empty;
 
         [BsonElement("fileMimetype")]
-        public string FileMimetype { get; set; }
+        public string FileMimetype { get; set; } = string.Empty;
 
         [BsonIgnore]
-        public string FileUrl { get; set; }
+        public string FileUrl { get; set; } = string.Empty;
 
         [JsonIgnore]
         [BsonElement("objectKey")]
-        public string ObjectKey { get; set; }
+        public string ObjectKey { get; set; } = string.Empty;
 
         [JsonIgnore]
         [BsonRepresentation(BsonType.String)]

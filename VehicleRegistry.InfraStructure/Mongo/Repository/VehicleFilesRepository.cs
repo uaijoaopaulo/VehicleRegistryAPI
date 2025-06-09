@@ -6,7 +6,7 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
 {
     public class VehicleFilesRepository(IMongoDatabase mongoDatabase) : MongoBaseClient<VehicleFileModel>(mongoDatabase), IVehicleFilesRepository
     {
-        protected override string GetCollectionName<T>()
+        protected override string GetCollectionName()
         {
             return "vehicle-files";
         }

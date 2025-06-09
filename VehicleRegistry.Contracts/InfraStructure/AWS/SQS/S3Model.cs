@@ -2,7 +2,6 @@
 {
     public class S3Model
     {
-        public BucketModel Bucket { get; set; }
-        public ObjectModel Object { get; set; }
+        public ObjectModel? Object { get; set; }
     }
 }

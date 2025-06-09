@@ -6,7 +6,7 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
 {
     public class UsersRepository(IMongoDatabase mongoDatabase) : MongoBaseClient<UserModel>(mongoDatabase), IUsersRepository
     {
-        protected override string GetCollectionName<T>()
+        protected override string GetCollectionName()
         {
             return "users";
         }

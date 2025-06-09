@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: usrVehicleRegistry
+      MONGO_INITDB_ROOT_PASSWORD: 8xNpyq8dtv
+      MONGO_INITDB_DATABASE: vehicleregistry
+    volumes:
+      - ./mongo-init:/docker-entrypoint-initdb.d
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: vehicle_registry
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  integration-tests:
+    build:
+      context: .
+      dockerfile: VehicleRegistry.Tests/Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Test
+      - ConnectionStrings__MongoDBConnection=mongodb://usrVehicleRegistry:8xNpyq8dtv@mongo:27017/vehicleregistry
+      - ConnectionStrings__PostgresConnection=Host=postgres;Port=5432;Database=vehicle_registry;Username=postgres;Password=postgres
+    entrypoint: ["dotnet", "test", "VehicleRegistry.Tests.dll", "--filter", "Category=Integration", "--logger:trx"]
+    working_dir: /app/teste
+
+volumes:
+  mongo-data:
+  pg-data:

@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,7 @@
     <ProjectReference Include="..\VehicleRegistry.Contracts\VehicleRegistry.Contracts.csproj" />
     <ProjectReference Include="..\VehicleRegistry.InfraStructure\VehicleRegistry.InfraStructure.csproj" />
     <ProjectReference Include="..\VehicleRegistry.Manager\VehicleRegistry.Manager.csproj" />
+    <InternalsVisibleTo Include="VehicleRegistry.Tests" />
   </ItemGroup>
 
 </Project>

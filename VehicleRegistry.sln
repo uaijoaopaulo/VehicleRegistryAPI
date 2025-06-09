@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongo-init", "mongo-init", 
 		mongo-init\02-init-vehicle-files-collection.js = mongo-init\02-init-vehicle-files-collection.js
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleRegistry.Tests", "VehicleRegistry.Tests\VehicleRegistry.Tests.csproj", "{49205C6C-83C5-4441-B186-D9F17A7B0CE1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC42E633-A6F5-4F72-80C8-43EC8DA021AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49205C6C-83C5-4441-B186-D9F17A7B0CE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49205C6C-83C5-4441-B186-D9F17A7B0CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49205C6C-83C5-4441-B186-D9F17A7B0CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49205C6C-83C5-4441-B186-D9F17A7B0CE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

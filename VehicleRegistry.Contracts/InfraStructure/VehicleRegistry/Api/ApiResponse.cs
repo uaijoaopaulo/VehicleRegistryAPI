@@ -2,7 +2,7 @@
 {
     public class ApiResponse<T>
     {
-        public List<string> Errors { get; set; } = new();
+        public List<string> Errors { get; set; } = [];
         public T? Result { get; set; }
     }
 }

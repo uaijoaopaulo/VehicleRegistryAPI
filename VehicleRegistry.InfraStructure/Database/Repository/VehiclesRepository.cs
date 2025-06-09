@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
+using VehicleRegistry.Contracts.Manager.Vehicle;
 
 namespace VehicleRegistry.InfraStructure.Database.Repository
 {

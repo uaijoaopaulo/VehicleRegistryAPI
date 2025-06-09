@@ -7,8 +7,9 @@ namespace VehicleRegistry.Api.Controllers
 {
     [ApiController]
     [Route("api/auth")]
-    public class AuthController(IAuthManager authManager) : ControllerBase
+    public class AuthController(ILogger<AuthController> logger, IAuthManager authManager) : ControllerBase
     {
+        private readonly ILogger<AuthController> _logger = logger;
         private readonly IAuthManager _authManager = authManager;
 
         [HttpPost("login")]
@@ -20,28 +21,27 @@ namespace VehicleRegistry.Api.Controllers
 
                 if (user is null)
                 {
-                    return Unauthorized(new ApiResponse<LoginResponse>
-                    {
-                        Errors = new List<string> { "Usuário ou senha inválidos" }
-                    });
+                    _logger.LogInformation($"Falha de autenticação para o usuário '{request.Username}'");
+                    return Unauthorized(ApiResponseHelper.Failure("Usuário ou senha inválidos"));
                 }
 
                 var token = _authManager.GenerateToken(user);
-                return Ok(new ApiResponse<LoginResponse>
+
+                _logger.LogInformation($"Usuário '{request.Username}' autenticado com sucesso");
+
+                var response = new LoginResponse
                 {
-                    Result = new LoginResponse
-                    {
-                        Token = token,
-                        Roles = user.Roles
-                    }
-                });
+                    Token = token,
+                    Roles = user.Roles
+                };
+
+                return Ok(ApiResponseHelper.Success(response));
             }
             catch (Exception e)
             {
-                return BadRequest(new ApiResponse<LoginResponse>
-                {
-                    Errors = new List<string> { e.Message }
-                });
+                _logger.LogError(e, $"Erro inesperado durante autenticação para o usuário '{request.Username}'");
+
+                return BadRequest(ApiResponseHelper.Failure("Erro interno no servidor. Tente novamente mais tarde."));
             }
         }
     }

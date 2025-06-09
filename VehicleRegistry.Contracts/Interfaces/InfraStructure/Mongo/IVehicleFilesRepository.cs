@@ -1,4 +1,4 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
+﻿using VehicleRegistry.Contracts.Manager.VehicleFiles;
 
 namespace VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo
 {

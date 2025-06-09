@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
+using VehicleRegistry.Contracts.Manager.Vehicle;
 
 namespace VehicleRegistry.InfraStructure.Database
 {

@@ -6,9 +6,9 @@
         /// 
         /// </summary>
         /// <param name="fileName"></param>
-        /// <param name="contentType"></param>
+        /// <param name="mimeType"></param>
         /// <returns></returns>
-        string GeneratePresignedUrl(string fileName, string contentType);
+        string GeneratePresignedUrl(string fileName, string mimeType);
 
         /// <summary>
         /// 

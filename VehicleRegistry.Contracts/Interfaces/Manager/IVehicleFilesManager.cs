@@ -1,4 +1,4 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
+﻿using VehicleRegistry.Contracts.Manager.VehicleFiles;
 
 namespace VehicleRegistry.Contracts.Interfaces.Manager
 {
@@ -7,7 +7,6 @@ namespace VehicleRegistry.Contracts.Interfaces.Manager
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bucketName"></param>
         /// <param name="idVehicle"></param>
         /// <returns></returns>
         Task<List<VehicleFileModel>> GetVehicleFilesAsync(int idVehicle);
@@ -17,9 +16,9 @@ namespace VehicleRegistry.Contracts.Interfaces.Manager
         /// </summary>
         /// <param name="idVehicle"></param>
         /// <param name="fileName"></param>
-        /// <param name="contentType"></param>
+        /// <param name="mimeType"></param>
         /// <returns></returns>
-        Task SaveVehicleFileDataAsync(int idVehicle, string fileName, string contentType);
+        Task SaveVehicleFileDataAsync(int idVehicle, string fileName, string mimeType);
 
         /// <summary>
         /// 

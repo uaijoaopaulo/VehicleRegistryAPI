@@ -1,4 +1,4 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
+﻿using VehicleRegistry.Contracts.Manager.Vehicle;
 
 namespace VehicleRegistry.Contracts.Interfaces.InfraStructure.Database
 {

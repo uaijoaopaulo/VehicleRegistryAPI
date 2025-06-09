@@ -2,11 +2,14 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
 
-namespace VehicleRegistry.Contracts.InfraStructure.Mongo
+namespace VehicleRegistry.Contracts.Manager.VehicleFiles
 {
     [BsonIgnoreExtraElements]
     public class VehicleFileModel
     {
+        [BsonIgnore]
+        public int Id { get; set; }
+
         [BsonElement("vehicleId")]
         public int VehicleId { get; set; }
 

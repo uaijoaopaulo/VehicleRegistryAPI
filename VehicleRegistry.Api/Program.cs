@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
+using VehicleRegistry.Contracts.InfraStructure.Validators;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
@@ -15,6 +16,7 @@ using VehicleRegistry.InfraStructure.AWS;
 using VehicleRegistry.InfraStructure.Database;
 using VehicleRegistry.InfraStructure.Database.Repository;
 using VehicleRegistry.InfraStructure.Mongo.Repository;
+using VehicleRegistry.InfraStructure.Validators;
 using VehicleRegistry.Manager;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +50,8 @@ builder.Services.AddScoped(sp =>
     var client = sp.GetRequiredService<IMongoClient>();
     return client.GetDatabase(mongoUrl.DatabaseName);
 });
+builder.Services.AddSingleton<ILicensePlateValidator, LicensePlateValidator>(); 
+builder.Services.AddSingleton<IFileExtensionValidator, FileExtensionValidator>();
 
 /////////////////////////REPOSITORY////////////////////////////
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();

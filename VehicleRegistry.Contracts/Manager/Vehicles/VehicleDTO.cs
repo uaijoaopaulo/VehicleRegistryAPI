@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models
+namespace VehicleRegistry.Contracts.Manager.Vehicle
 {
     public class VehicleDTO
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public string? Make { get; set; }
 
         [Required(ErrorMessage = "Model is required.")]

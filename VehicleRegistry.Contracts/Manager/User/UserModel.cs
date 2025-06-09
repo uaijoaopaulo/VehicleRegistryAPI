@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
-namespace VehicleRegistry.Contracts.InfraStructure.Mongo
+namespace VehicleRegistry.Contracts.Manager.User
 {
     [BsonIgnoreExtraElements]
     public class UserModel

@@ -1,5 +1,4 @@
-﻿using VehicleRegistry.Contracts.InfraStructure.Mongo;
-using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Models;
+﻿using VehicleRegistry.Contracts.Manager.Vehicle;
 
 namespace VehicleRegistry.Contracts.Interfaces.Manager
 {

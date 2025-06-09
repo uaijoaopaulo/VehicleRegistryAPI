@@ -35,7 +35,7 @@ namespace VehicleRegistry.Worker.Workers
                                 }
 
                                 var objectKey = Uri.UnescapeDataString(record.S3.Object.Key);
-                                await _vehicleFilesManager.MakeFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
+                                await _vehicleFilesManager.MarkFileAsProcessedAsync(objectKey, record.EventTime ?? DateTime.UtcNow);
                                 _logger.LogInformation($"Processed file {objectKey}");
                             }
                         }

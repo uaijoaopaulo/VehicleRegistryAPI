@@ -66,7 +66,7 @@ namespace VehicleRegistry.Manager
             }
         }
 
-        public async Task MakeFileAsProcessedAsync(string objectKey, DateTime eventTime)
+        public async Task MarkFileAsProcessedAsync(string objectKey, DateTime eventTime)
         {
             try
             {

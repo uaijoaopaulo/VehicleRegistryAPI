@@ -11,9 +11,9 @@ namespace VehicleRegistry.InfraStructure.Mongo.Repository
             return "vehicle-files";
         }
 
-        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int idVehicle)
+        public async Task<List<VehicleFileModel>> GetVehicleFileAsync(int vehicleId)
         {
-            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, idVehicle)
+            var filter = Builders<VehicleFileModel>.Filter.Eq(x => x.VehicleId, vehicleId)
             & Builders<VehicleFileModel>.Filter.Eq(x => x.Status, FileStatus.Uploaded);
             return await GetAllAsync(filter);
         }

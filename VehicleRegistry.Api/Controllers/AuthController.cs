@@ -21,13 +21,13 @@ namespace VehicleRegistry.Api.Controllers
 
                 if (user is null)
                 {
-                    _logger.LogInformation($"Falha de autenticação para o usuário '{request.Username}'");
-                    return Unauthorized(ApiResponseHelper.Failure("Usuário ou senha inválidos"));
+                    _logger.LogInformation($"Authentication failed for user '{request.Username}'");
+                    return Unauthorized(ApiResponseHelper.Failure("Invalid username or password"));
                 }
 
                 var token = _authManager.GenerateToken(user);
 
-                _logger.LogInformation($"Usuário '{request.Username}' autenticado com sucesso");
+                _logger.LogInformation($"User '{request.Username}' successfully authenticated");
 
                 var response = new LoginResponse
                 {
@@ -39,9 +39,8 @@ namespace VehicleRegistry.Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Erro inesperado durante autenticação para o usuário '{request.Username}'");
-
-                return BadRequest(ApiResponseHelper.Failure("Erro interno no servidor. Tente novamente mais tarde."));
+                _logger.LogError(e, $"Unexpected error during authentication for user '{request.Username}'");
+                return BadRequest(ApiResponseHelper.Failure("An unexpected error occurred. Please try again later."));
             }
         }
     }

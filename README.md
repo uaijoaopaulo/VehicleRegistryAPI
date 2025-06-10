@@ -19,6 +19,7 @@ Ambos os serviços dependem de **MongoDB** e **PostgreSQL**, e são orquestrados
 - Amazon S3
 - Amazon SQS
 - JWT
+- xUnit
 
 ---
 

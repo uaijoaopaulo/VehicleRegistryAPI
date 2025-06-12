@@ -1,23 +1,21 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
-using Microsoft.Extensions.Configuration;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 
 namespace VehicleRegistry.InfraStructure.AWS
 {
-    public class AmazonS3Connector(IConfiguration configuration, IAmazonS3 amazonS3Client) : IAmazonS3Connector
+    public class AmazonS3Connector(IAmazonS3 amazonS3Client) : IAmazonS3Connector
     {
-        private readonly string _bucketName = configuration["S3:VehicleFileBucket"]!;
         private readonly IAmazonS3 _amazonS3Client = amazonS3Client;
 
-        public string GeneratePresignedUrl(string fileName, string mimeType)
+        public string GeneratePresignedUrl(string fileName, string mimeType, string bucketName)
         {
             var urlString = string.Empty;
             try
             {
                 var request = new GetPreSignedUrlRequest
                 {
-                    BucketName = _bucketName,
+                    BucketName = bucketName,
                     Key = fileName,
                     Verb = HttpVerb.PUT,
                     Expires = DateTime.UtcNow.AddMinutes(15),
@@ -33,14 +31,14 @@ namespace VehicleRegistry.InfraStructure.AWS
             return urlString;
         }
 
-        public string GetTemporaryAccessUrl(string objectKey) 
+        public string GetTemporaryAccessUrl(string objectKey, string bucketName) 
         {
             var urlString = string.Empty;
             try
             {
                 var request = new GetPreSignedUrlRequest
                 {
-                    BucketName = _bucketName,
+                    BucketName = bucketName,
                     Key = objectKey,
                     Verb = HttpVerb.GET,
                     Expires = DateTime.UtcNow.AddHours(1)

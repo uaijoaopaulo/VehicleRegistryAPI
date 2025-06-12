@@ -5,12 +5,12 @@ using VehicleRegistry.Contracts.Interfaces.Manager;
 namespace VehicleRegistry.Worker.Workers
 {
     public class FileUploadedWorkerService(
-        IConfiguration configuration, 
+        IAmazonConnector amazonConnector, 
         ILogger<FileUploadedWorkerService> logger, 
         IAmazonSQSConnector amazonSQSConnector, 
         IVehicleFilesManager vehicleFilesManager) : BackgroundService
     {
-        private readonly string _queueUrl = configuration["AWSQueueUrl:FileUploaded"]!;
+        private readonly string _queueUrl = amazonConnector.GetQueueById("VehicleFileBucket")?.QueueUrl!;
         private readonly ILogger<FileUploadedWorkerService> _logger = logger;
         private readonly IAmazonSQSConnector _amazonSQSConnector = amazonSQSConnector;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;

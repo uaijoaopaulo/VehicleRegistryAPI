@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using VehicleRegistry.Contracts.InfraStructure.Validators;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Vehicles;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.Manager;
 using VehicleRegistry.Contracts.Manager.Vehicle;
 
@@ -11,10 +10,9 @@ namespace VehicleRegistry.Api.Controllers
 {
     [ApiController]
     [Route("api/vehicles")]
-    public class VehiclesController(ILogger<VehiclesController> logger, IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IAmazonS3Connector amazonS3Connector, IFileExtensionValidator fileExtensionValidator) : ControllerBase
+    public class VehiclesController(ILogger<VehiclesController> logger, IVehiclesManager vehiclesManager, IVehicleFilesManager vehicleFilesManager, IFileExtensionValidator fileExtensionValidator) : ControllerBase
     {
         private readonly ILogger<VehiclesController> _logger = logger;
-        private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
         private readonly IVehiclesManager _vehiclesManager = vehiclesManager;
         private readonly IVehicleFilesManager _vehicleFilesManager = vehicleFilesManager;
         private readonly IFileExtensionValidator _fileExtensionValidator = fileExtensionValidator;
@@ -147,10 +145,7 @@ namespace VehicleRegistry.Api.Controllers
                     return BadRequest(ApiResponseHelper.Failure(errors));
                 }
 
-                await _vehicleFilesManager.SaveVehicleFileDataAsync(vehicleId, payload.FileName, payload.FileMimetype);
-
-                var fileName = $"{vehicleId}/{Uri.EscapeDataString(payload.FileName)}";
-                var presignedUrl = _amazonS3Connector.GeneratePresignedUrl(fileName, payload.FileMimetype);
+                var presignedUrl = await _vehicleFilesManager.RegisterVehicleFileAndGetUploadUrlAsync(vehicleId, payload.FileName, payload.FileMimetype);
 
                 _logger.LogDebug($"Presigned URL generated successfully for ID: {vehicleId}, FileName: {payload.FileName}");
 

@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Manager.VehicleFiles;
@@ -16,13 +11,14 @@ namespace VehicleRegistry.Tests.Unit.Managers
     {
         private readonly Mock<IVehicleFilesRepository> _mockRepository = new();
         private readonly Mock<IAmazonS3Connector> _mockS3 = new();
+        private readonly Mock<IAmazonConnector> _mockAmazon = new();
         private readonly Mock<ILogger<VehicleFilesManager>> _mockLogger = new();
 
         private readonly VehicleFilesManager _manager;
 
         public VehicleFilesManagerTests()
         {
-            _manager = new VehicleFilesManager(_mockLogger.Object, _mockRepository.Object, _mockS3.Object);
+            _manager = new VehicleFilesManager(_mockLogger.Object, _mockRepository.Object, _mockS3.Object, _mockAmazon.Object);
         }
 
         [Fact]
@@ -37,7 +33,7 @@ namespace VehicleRegistry.Tests.Unit.Managers
                 .Callback<VehicleFileModel>(model => capturedModel = model)
                 .ReturnsAsync((VehicleFileModel model) => model);
 
-            await _manager.SaveVehicleFileDataAsync(id, filename, mimetype);
+            await _manager.RegisterVehicleFileAndGetUploadUrlAsync(id, filename, mimetype);
 
             Assert.NotNull(capturedModel);
             Assert.Equal(id, capturedModel!.VehicleId);
@@ -58,7 +54,7 @@ namespace VehicleRegistry.Tests.Unit.Managers
             };
 
             _mockRepository.Setup(r => r.GetVehicleFileAsync(vehicleId)).ReturnsAsync(files);
-            _mockS3.Setup(s => s.GetTemporaryAccessUrl("456/test.jpg")).Returns("https://s3.test/456/test.jpg");
+            _mockS3.Setup(s => s.GetTemporaryAccessUrl("456/test.jpg", It.IsAny<string>())).Returns("https://s3.test/456/test.jpg");
 
             var result = await _manager.GetVehicleFilesAsync(vehicleId);
             Assert.Single(result);
@@ -84,7 +80,7 @@ namespace VehicleRegistry.Tests.Unit.Managers
                 .ThrowsAsync(new Exception("Database failure"));
 
             var ex = await Assert.ThrowsAsync<Exception>(() =>
-                _manager.SaveVehicleFileDataAsync(1, "file.png", "image/png"));
+                _manager.RegisterVehicleFileAndGetUploadUrlAsync(1, "file.png", "image/png"));
             Assert.Equal("Error occurred while saving vehicle file.", ex.Message);
         }
 

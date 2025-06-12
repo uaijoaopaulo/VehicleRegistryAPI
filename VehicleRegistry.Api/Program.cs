@@ -1,12 +1,15 @@
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
+using Amazon.SQS;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using System.Net;
 using System.Text;
 using System.Text.Json.Serialization;
+using VehicleRegistry.Contracts.InfraStructure.AWS.AWSConfig;
 using VehicleRegistry.Contracts.InfraStructure.Validators;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Database;
@@ -32,8 +35,14 @@ ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProt
 /////////////////////////INFRASTRUCTURE////////////////////////////
 builder.Services.AddHttpClient();
 builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddAWSService<IAmazonSQS>();
 builder.Services.AddDefaultAWSOptions(new AWSOptions());
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWS"));
 builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
+builder.Services.AddTransient<IAmazonSQSConnector, AmazonSQSConnector>();
+
+builder.Services.AddSingleton<IAmazonConnector, AmazonConnector>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection"), b =>
@@ -115,6 +124,15 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var config = scope.ServiceProvider.GetRequiredService<IOptions<AwsOptions>>();
+    var amazonConnector = scope.ServiceProvider.GetRequiredService<IAmazonConnector>();
+
+    await amazonConnector.EnsureBucketAsync();
+    await amazonConnector.EnsureQueuesAsync();
+}
 
 using (var scope = app.Services.CreateScope())
 {

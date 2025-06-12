@@ -12,13 +12,17 @@ namespace VehicleRegistry.Contracts.Interfaces.Manager
         Task<List<VehicleFileModel>> GetVehicleFilesAsync(int vehicleId);
 
         /// <summary>
-        /// Saves metadata for a new vehicle file to the database or storage system.
+        /// Registers metadata for a new vehicle file and generates a pre-signed URL 
+        /// to upload the file to the storage service.
         /// </summary>
         /// <param name="vehicleId">The unique identifier of the vehicle associated with the file.</param>
-        /// <param name="fileName">The name of the file to be saved.</param>
-        /// <param name="mimeType">The MIME type of the file.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        Task SaveVehicleFileDataAsync(int vehicleId, string fileName, string mimeType);
+        /// <param name="fileName">The name (including extension) of the file to be uploaded.</param>
+        /// <param name="mimeType">The MIME type of the file (e.g., "image/jpeg", "application/pdf").</param>
+        /// <returns>
+        /// A task representing the asynchronous operation, containing the pre-signed upload URL 
+        /// for the specified file.
+        /// </returns>
+        Task<string> RegisterVehicleFileAndGetUploadUrlAsync(int vehicleId, string fileName, string mimeType);
 
         /// <summary>
         /// Marks a file as processed using its object key and the associated event timestamp.

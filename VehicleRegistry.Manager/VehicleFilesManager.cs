@@ -6,13 +6,14 @@ using VehicleRegistry.Contracts.Manager.VehicleFiles;
 
 namespace VehicleRegistry.Manager
 {
-    public class VehicleFilesManager(ILogger<VehicleFilesManager> logger, IVehicleFilesRepository vehicleFilesRepository, IAmazonS3Connector amazonS3Connector) : IVehicleFilesManager
+    public class VehicleFilesManager(ILogger<VehicleFilesManager> logger, IVehicleFilesRepository vehicleFilesRepository, IAmazonS3Connector amazonS3Connector, IAmazonConnector amazonConnector) : IVehicleFilesManager
     {
         private readonly ILogger<VehicleFilesManager> _logger = logger;
         private readonly IVehicleFilesRepository _vehicleFilesRepository = vehicleFilesRepository;
-        private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector;
+        private readonly IAmazonS3Connector _amazonS3Connector = amazonS3Connector; 
+        private readonly string _bucketName = amazonConnector.GetQueueById("VehicleFileBucket")?.BucketName!;
 
-        public async Task SaveVehicleFileDataAsync(int vehicleId, string fileName, string mimeType)
+        public async Task<string> RegisterVehicleFileAndGetUploadUrlAsync(int vehicleId, string fileName, string mimeType)
         {
             try
             {
@@ -32,6 +33,8 @@ namespace VehicleRegistry.Manager
                 await _vehicleFilesRepository.InsertOneAsync(newFile);
 
                 _logger.LogDebug($"Vehicle file data saved successfully. ObjectKey: {objectKey}");
+
+                return _amazonS3Connector.GeneratePresignedUrl(objectKey, mimeType, _bucketName);
             }
             catch (Exception ex)
             {
@@ -50,7 +53,7 @@ namespace VehicleRegistry.Manager
                 var updatedVehicleFiles = vehicleFiles
                     .Select(vehicleFile =>
                     {
-                        vehicleFile.FileUrl = _amazonS3Connector.GetTemporaryAccessUrl(vehicleFile.ObjectKey);
+                        vehicleFile.FileUrl = _amazonS3Connector.GetTemporaryAccessUrl(vehicleFile.ObjectKey, _bucketName);
                         return vehicleFile;
                     })
                     .ToList();

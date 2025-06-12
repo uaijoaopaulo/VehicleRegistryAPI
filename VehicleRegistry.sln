@@ -16,8 +16,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{28EECC32-08B4-4528-A069-C65B109C193A}"
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
-		docker-compose.yml = docker-compose.yml
+		docker-compose-dev.yml = docker-compose-dev.yml
 		docker-compose-test.yml = docker-compose-test.yml
+		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongo-init", "mongo-init", "{FF443989-9790-4317-9780-028A219B17A7}"
@@ -27,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongo-init", "mongo-init", 
 		mongo-init\02-init-vehicle-files-collection.js = mongo-init\02-init-vehicle-files-collection.js
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleRegistry.Tests", "VehicleRegistry.Tests\VehicleRegistry.Tests.csproj", "{49205C6C-83C5-4441-B186-D9F17A7B0CE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VehicleRegistry.Tests", "VehicleRegistry.Tests\VehicleRegistry.Tests.csproj", "{49205C6C-83C5-4441-B186-D9F17A7B0CE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

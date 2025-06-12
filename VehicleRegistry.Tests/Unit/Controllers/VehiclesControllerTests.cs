@@ -1,16 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VehicleRegistry.Api.Controllers;
 using VehicleRegistry.Contracts.InfraStructure.Validators;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api.Vehicles;
 using VehicleRegistry.Contracts.InfraStructure.VehicleRegistry.Api;
-using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.Manager;
 using VehicleRegistry.Contracts.Manager.Vehicle;
 using VehicleRegistry.Contracts.Manager.VehicleFiles;
@@ -22,7 +16,6 @@ namespace VehicleRegistry.Tests.Unit.Controllers
         private readonly Mock<ILogger<VehiclesController>> _mockLogger = new();
         private readonly Mock<IVehiclesManager> _mockVehiclesManager = new();
         private readonly Mock<IVehicleFilesManager> _mockVehicleFilesManager = new();
-        private readonly Mock<IAmazonS3Connector> _mockAmazonS3Connector = new();
         private readonly Mock<IFileExtensionValidator> _mockFileExtensionValidator = new();
 
         private readonly VehiclesController _controller;
@@ -33,7 +26,6 @@ namespace VehicleRegistry.Tests.Unit.Controllers
                 _mockLogger.Object,
                 _mockVehiclesManager.Object,
                 _mockVehicleFilesManager.Object,
-                _mockAmazonS3Connector.Object,
                 _mockFileExtensionValidator.Object
             );
         }
@@ -129,11 +121,8 @@ namespace VehicleRegistry.Tests.Unit.Controllers
             _mockFileExtensionValidator.Setup(v => v.IsValidExtension(".pdf")).Returns(true);
             _mockFileExtensionValidator.Setup(v => v.IsValidMimeType("application/pdf")).Returns(true);
 
-            _mockVehicleFilesManager.Setup(m => m.SaveVehicleFileDataAsync(vehicleId, payload.FileName, payload.FileMimetype))
-                .Returns(Task.CompletedTask);
-
-            _mockAmazonS3Connector.Setup(m => m.GeneratePresignedUrl($"{vehicleId}/{Uri.EscapeDataString(payload.FileName)}", payload.FileMimetype))
-                .Returns(presignedUrl);
+            _mockVehicleFilesManager.Setup(m => m.RegisterVehicleFileAndGetUploadUrlAsync(vehicleId, payload.FileName, payload.FileMimetype))
+                .ReturnsAsync(presignedUrl);
 
             var result = await _controller.PostFileVehicle(vehicleId, payload);
             var ok = Assert.IsType<OkObjectResult>(result);

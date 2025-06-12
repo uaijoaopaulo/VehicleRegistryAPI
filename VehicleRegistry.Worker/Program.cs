@@ -1,8 +1,10 @@
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
 using Amazon.SQS;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System.Net;
+using VehicleRegistry.Contracts.InfraStructure.AWS.AWSConfig;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Aws;
 using VehicleRegistry.Contracts.Interfaces.InfraStructure.Mongo;
 using VehicleRegistry.Contracts.Interfaces.Manager;
@@ -21,8 +23,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddAWSService<IAmazonSQS>();
 builder.Services.AddAWSService<IAmazonS3>();
 builder.Services.AddDefaultAWSOptions(new AWSOptions());
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection("AWS"));
 builder.Services.AddTransient<IAmazonSQSConnector, AmazonSQSConnector>();
 builder.Services.AddTransient<IAmazonS3Connector, AmazonS3Connector>();
+builder.Services.AddTransient<IAmazonConnector, AmazonConnector>();
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient(builder.Configuration.GetConnectionString("MongoDBConnection")));
 builder.Services.AddTransient(sp =>
 {
@@ -43,4 +47,14 @@ builder.Services.AddTransient<IVehicleFilesRepository, VehicleFilesRepository>()
 builder.Services.AddHostedService<FileUploadedWorkerService>();
 
 var host = builder.Build();
+
+using (var scope = host.Services.CreateScope())
+{
+    var config = scope.ServiceProvider.GetRequiredService<IOptions<AwsOptions>>();
+    var amazonConnector = scope.ServiceProvider.GetRequiredService<IAmazonConnector>();
+
+    await amazonConnector.EnsureBucketAsync();
+    await amazonConnector.EnsureQueuesAsync();
+}
+
 host.Run();

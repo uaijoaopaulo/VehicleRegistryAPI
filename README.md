@@ -27,73 +27,17 @@ Ambos os serviços dependem de **MongoDB** e **PostgreSQL**, e são orquestrados
 
 ### 1. Pré-requisitos
 
-- Docker + Docker Compose instalados
-- Conta AWS com:
-  - Bucket S3: `vehiclesregistry-vehicle-files`
-  - Fila SQS: `vehiclesregistry-FileUploadedS3Notifications`
-- Arquivo de credenciais da AWS em `~/.aws/credentials` com perfil `[default]` configurado
+- **Permissões no EC2 (Produção):**  
+  O perfil da IAM Role associado à instância EC2.
 
-- Caso prefira utilizar um nome diferente para o Bucket ou a Fila SQS, lembre-se de atualizar os respectivos valores nas variáveis de ambiente e arquivos de configuração do projeto.
+- **Credenciais da AWS (Local):**  
+  As credenciais devem estar configuradas no arquivo `~/.aws/credentials` utilizando o perfil padrão (`[default]`).
+  
+- Em ambas as credenciais devem conter as seguintes permissões:
+  - `AmazonS3FullAccess`
+  - `AmazonSQSFullAccess`
 
-### 2. Configuração da AWS
-
-- Crie o bucket S3 com o nome desejado (ou utilize `vehiclesregistry-vehicle-files`). 
-- Configure o bucket para enviar notificações de eventos PUT para a sua própria fila SQS, criada e referenciada nas variáveis de ambiente do projeto.
-  Exemplo de URL (substitua pela sua):
-  `https://sqs.us-east-2.amazonaws.com/475515413144/vehiclesregistry-FileUploadedS3Notifications`
-
-  #### 🛠️ Como configurar o S3 para enviar notificações de PUT para a fila SQS
-    1. Acesse o Console da AWS
-      Vá até o [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/).
-
-    2. Selecione o Bucket desejado
-      Clique no nome do bucket que você criou (ex: vehiclesregistry-vehicle-files).
-
-    3. Acesse a aba “Properties” (Propriedades)
-
-    4. Role até a seção “Event notifications” (Notificações de eventos)
-      Clique em "Create event notification".
-
-    5. Configure os detalhes da notificação
-
-        - Name: Dê um nome descritivo à notificação (ex: PutToSQS).
-        - Event types: Marque a opção PUT.
-        - Prefix / Suffix (opcional): Deixe em branco, a menos que deseje filtrar por pasta ou extensão de arquivo.
-
-    6. Destino (Destination)
-    
-        - Selecione SQS Queue.
-        - Escolha a fila SQS criada anteriormente.
-        - Caso ela não apareça na lista, verifique se:
-            - A fila está na mesma região do bucket;
-            - O usuário/role tem permissão para acessá-la.
-
-    7. Salvar
-      Clique em "Save changes" para concluir a configuração.
-
-  #### 🔐 Permissões Recomendadas
-    Certifique-se de que a fila SQS permita que o bucket S3 envie mensagens. Você pode adicionar uma política de acesso à fila SQS como esta (ajuste bucket-name e queue-arn):
-
-    ```json
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Principal": { "Service": "s3.amazonaws.com" },
-          "Action": "SQS:SendMessage",
-          "Resource": "arn:aws:sqs:us-east-2:account-id:queue-name",
-          "Condition": {
-            "ArnLike": {
-              "aws:SourceArn": "arn:aws:s3:::bucket-name"
-            }
-          }
-        }
-      ]
-    }
-    ```
-
-### 3. Subir os containers
+### 2. Subir os containers
 
 ```bash
 docker-compose up --build
@@ -105,6 +49,7 @@ Esse comando irá:
 - Criar o banco de dados, usuário e as collections do MongoDB:
   - `usuarios` (com 2 usuários pré-configurados)
   - `vehicle-files` com TTL de 24 horas
+- Criar o Bucket e a Queue na AWS já configurados.
 - Iniciar o consumo contínuo da fila SQS pelo `VehicleRegistry.Worker`
 
 ---
